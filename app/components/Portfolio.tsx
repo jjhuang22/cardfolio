@@ -15,7 +15,7 @@ import { CreditMenu, type CellTarget } from "./CreditCell";
 import { SettingsDrawer, type Membership } from "./SettingsDrawer";
 import { GettingStarted } from "./GettingStarted";
 import { CheckIcon, Dot, personTone, Toast, type ToastMessage } from "./ui";
-import { shortDate } from "../lib/presentation/format";
+import { fullDate } from "../lib/presentation/format";
 
 type Props = { db: SupabaseClient; accessToken: string; onSignOut: () => Promise<void> };
 type View = "cards" | "credits";
@@ -274,7 +274,7 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
               <span className="facts">
                 <span><b className="num">{stats.open}</b> open</span>
                 <span><b className="num">{stats.closed}</b> closed</span>
-                <span>5/24 <b className="num">{stats.fiveTwentyFour.count}</b>{stats.fiveTwentyFour.nextDrop ? `, drops ${shortDate(stats.fiveTwentyFour.nextDrop)}` : ""}</span>
+                <span>5/24 <b className="num">{stats.fiveTwentyFour.count}</b>{stats.fiveTwentyFour.nextDrop ? `, drops ${fullDate(stats.fiveTwentyFour.nextDrop)}` : ""}</span>
                 {stats.pending > 0 && <span><b className="num">{stats.pending}</b> pending</span>}
               </span>
             </div>

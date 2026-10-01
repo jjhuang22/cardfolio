@@ -80,6 +80,8 @@ done and move them to **Done** with the date.
 
 ## Done
 
+- [x] 2026-10-01: Show the year in the next 5/24 drop date so future years are explicit.
+
 - 2026-10-01: Colored cardholder icons show two letters from the configured abbreviation.
   Card labels and Settings preserve chosen letter casing instead of forcing uppercase.
 
