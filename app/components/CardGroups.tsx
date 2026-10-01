@@ -1,6 +1,6 @@
 "use client";
 
-import { formatCreditAmount, creditIsDue, creditState, creditSummary, eligibleHoldings, periodFor, DUE_WINDOW_DAYS } from "../lib/core/credits";
+import { creditAmount, formatCreditAmount, creditIsDue, creditState, creditSummary, eligibleHoldings, periodFor, DUE_WINDOW_DAYS } from "../lib/core/credits";
 import { daysBetween } from "../lib/core/dates";
 import { holdingName, shortName, type Account, type Credit, type Holding, type Portfolio } from "../lib/core/model";
 import { CreditCell, type CellTarget } from "./CreditCell";
@@ -40,11 +40,12 @@ export const groupId = (key: string) => `g-${key.replace(/[^a-z0-9]+/gi, "-")}`;
 export function CardGroups(props: GroupProps) {
   const { portfolio, today, include, collapsed, onCollapse, showClosed, onShowClosed } = props;
   let closedRows = 0;
-  const productsWithCredits = [...new Set(portfolio.credits.map((credit) => credit.productId))];
+  const visibleCredits = portfolio.credits.filter((credit) => !credit.hidden);
+  const productsWithCredits = [...new Set(visibleCredits.map((credit) => credit.productId))];
 
   const groups = productsWithCredits.map((productId) => {
     const product = portfolio.product(productId)!;
-    const credits = portfolio.credits.filter((credit) => credit.productId === productId).sort((left, right) => left.sort - right.sort);
+    const credits = visibleCredits.filter((credit) => credit.productId === productId).sort((left, right) => left.sort - right.sort);
     const eligible = new Map(credits.map((credit) => [credit.id, new Set(eligibleHoldings(portfolio, credit, today).map((holding) => holding.id))]));
     const rows = portfolio.holdings.filter((holding) => {
       if (holding.productId !== productId) return false;
@@ -67,7 +68,7 @@ export function CardGroups(props: GroupProps) {
 
   return (
     <>
-      {groups.length === 0 && <div className="empty">No cards with credits match.</div>}
+      {groups.length === 0 && <div className="empty">No visible credits match. Manage hidden credits in Settings → Card types and credits.</div>}
       {groups.map(({ product, credits, eligible, rows }) => {
         const key = `product-${product.id}`;
         const isCollapsed = Boolean(collapsed[key]);
@@ -151,7 +152,7 @@ function CreditHeader({ portfolio, credit, rows, today }: { portfolio: Portfolio
   return (
     <th className={`credit ${credit.remind ? "" : "muted"} ${due ? "due-col" : ""}`} title={credit.remind ? undefined : "Low priority: left out of To do"}>
       <span className="cname">{credit.name}</span>
-      <span className="cmeta num">{formatCreditAmount(credit, credit.amountCents)}</span>
+      <span className="cmeta num">{formatCreditAmount(credit, creditAmount(credit, today))}</span>
       <span className="cmeta">{meta}</span>
     </th>
   );

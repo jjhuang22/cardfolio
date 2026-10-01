@@ -111,9 +111,21 @@ function CreditRow({ credit, onSave, onDelete }: { credit: Credit; onSave: Props
         {CADENCES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select>
       <label className="check" title="Show in To do when it's unused near the end of a period">
-        <input type="checkbox" checked={credit.remind} onChange={(event) => void onSave(credit.id, { remind: event.target.checked })} /> Remind
+        <input type="checkbox" checked={!credit.hidden && credit.remind} disabled={Boolean(credit.hidden)} onChange={(event) => void onSave(credit.id, { remind: event.target.checked })} /> Remind
       </label>
       <DeleteButton label={credit.name} onDelete={() => void onDelete(credit.id)} />
+      <label className="check credit-visibility" title="Hide from Credits and turn off reminders; keep this credit and its history.">
+        <input type="checkbox" aria-label={`Hide ${credit.name} from Credits`} checked={Boolean(credit.hidden)} onChange={(event) => void onSave(credit.id, { hidden: event.target.checked })} /> Hide from Credits
+      </label>
+      {Object.entries(credit.monthlyAmounts || {}).map(([month, value]) => <label className="f" key={month}>
+        {new Intl.DateTimeFormat("en-US", { month: "long" }).format(new Date(2026, Number(month) - 1, 1))} amount
+        <input type="number" min="0.01" step="0.01" aria-label={`${credit.name} month ${month} amount`} defaultValue={value / 100} onBlur={(event) => {
+          const next = toCents(event.target.value);
+          if (next > 0 && next !== value) void onSave(credit.id, { monthlyAmounts: { ...credit.monthlyAmounts, [month]: next } });
+          else event.target.value = String(value / 100);
+        }} />
+      </label>)}
+
     </div>
   );
 }

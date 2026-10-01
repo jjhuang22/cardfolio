@@ -21,9 +21,9 @@ done and move them to **Done** with the date.
       Amex site itself couldn't be reached): Fine Hotels $300/half, Resy $100/qtr, lululemon $75/qtr,
       Airline fee $200/yr, Digital entertainment $25/mo, Uber Cash $15/mo, Uber One $120/yr,
       Walmart+ $12.95/mo, CLEAR $219/yr, Oura $200/yr, Equinox $300/yr. Delete any you won't
-      use in Settings → Card types and credits, or mark them not enrolled per card. Uber Cash
-      remains $15/month in the tracker; the real benefit adds $20 in December, which is not
-      separately tracked. Benefit amounts are maintained in Supabase; verify issuer terms
+      use in Settings → Card types and credits, mark them not enrolled per card, or hide them
+      from Credits (hiding also turns reminders off). Uber Cash tracks $15/month and $35 in
+      December through a monthly amount override. Benefit amounts are maintained in Supabase; verify issuer terms
       before changing them. Dated research is retained outside Git.
 - [ ] Stop editing the tracker, credits and stats tabs of the Google Sheet once the app is
       the source of truth.
@@ -36,6 +36,7 @@ done and move them to **Done** with the date.
       (see README).
 
 ## Review follow-ups
+
 
 - [ ] Before adding custom eligibility or certificate-expiration logic, confirm whether
       it is worth adding. Current annual free-night rows have reminders off; multi-year
@@ -78,6 +79,12 @@ done and move them to **Done** with the date.
       via RPC (they only reveal the caller's own membership); consider revoking `anon`.
 
 ## Done
+
+- 2026-10-01: Added Hide from Credits in card-type settings. Hidden credits remain editable
+  and retain usage and exports; hiding atomically turns Remind off, and unhiding leaves it
+  off until re-enabled. Hidden credits do not produce tasks or notifications. Restored
+  monthly amount overrides so Uber Cash has one $35 December total and $15 in other months.
+  Verified hidden-grid/settings rendering and regression tests for history and reminders.
 
 - 2026-10-01: Added free-night quantities for annual anniversary benefits. Kept existing
   fixed-amount credit logic and the original five reset cadences; removed the proposed

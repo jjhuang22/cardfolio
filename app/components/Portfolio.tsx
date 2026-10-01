@@ -2,7 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { formatCreditAmount, creditState } from "../lib/core/credits";
+import { creditAmount, formatCreditAmount, creditState } from "../lib/core/credits";
 import { atNoon } from "../lib/core/dates";
 import { cardTag, holdingName, indexPortfolio, type Account, type PortfolioData } from "../lib/core/model";
 import { dueItems, personStats } from "../lib/core/stats";
@@ -164,7 +164,7 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
     if (!portfolio) return;
     const state = creditState(portfolio, target.credit, target.holding, today);
     if (state.kind === "used") setUse(target, null, "Cleared");
-    else setUse(target, target.credit.amountCents, "Marked used:");
+    else setUse(target, creditAmount(target.credit, today), "Marked used:");
   }
 
   function setEnrolled(target: CellTarget, enrolled: boolean) {
@@ -326,11 +326,11 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
 
       {panel?.kind === "account" && (
         <AccountDrawer
-          today={today}
           key={`${panel.id ?? "new"}-${drawerVersion}`}
           portfolio={portfolio}
           accountId={panel.id}
           defaultPersonId={viewerPerson?.id ?? 0}
+          today={today}
           onClose={() => setPanel(null)}
           onSave={saveAccount}
           onChangeProduct={changeProduct}
@@ -353,10 +353,10 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
 
       {panel?.kind === "settings" && (
         <SettingsDrawer
-          today={today}
           accessToken={accessToken}
           notify={settingsNotify}
           portfolio={portfolio}
+          today={today}
           membership={membership}
           focus={panel.focus}
           onClose={() => setPanel(null)}
@@ -387,11 +387,12 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
       {menu && menuState && (
         <CreditMenu
           credit={menu.target.credit}
+          today={today}
           state={menuState}
           anchor={menu.anchor}
           heading={holdingName(portfolio, menu.target.holding)}
           onClose={() => setMenu(null)}
-          onUse={(amountCents) => { setMenu(null); setUse(menu.target, amountCents, amountCents === null ? "Cleared" : amountCents >= menu.target.credit.amountCents ? "Marked used:" : `Logged ${formatCreditAmount(menu.target.credit, amountCents)} of`); }}
+          onUse={(amountCents) => { setMenu(null); setUse(menu.target, amountCents, amountCents === null ? "Cleared" : amountCents >= creditAmount(menu.target.credit, today) ? "Marked used:" : `Logged ${formatCreditAmount(menu.target.credit, amountCents)} of`); }}
           onEnroll={(enrolled) => { setMenu(null); setEnrolled(menu.target, enrolled); }}
         />
       )}
