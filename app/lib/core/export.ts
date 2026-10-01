@@ -1,4 +1,4 @@
-import { CADENCE_LABELS, creditSummary, eligibleHoldings, periodFor } from "./credits.ts";
+import { creditAmount, CADENCE_LABELS, creditSummary, eligibleHoldings, periodFor } from "./credits.ts";
 import { isoDate } from "./dates.ts";
 import { bonusLabel, centsToDollars, type Portfolio } from "./model.ts";
 import { personStats } from "./stats.ts";
@@ -43,7 +43,7 @@ export function exportTables(portfolio: Portfolio, today: Date): ExportTables {
     });
   }
 
-  const credits: ExportTables["credits"] = [["card type", "credit", "amount", "frequency", "period", "used", "tracked cards", "left this period"]];
+  const credits: ExportTables["credits"] = [["card type", "credit", "amount", "frequency", "period", "used", "tracked cards", "left this period", "unit"]];
   for (const credit of portfolio.credits) {
     const holdings = eligibleHoldings(portfolio, credit, today);
     const summary = creditSummary(portfolio, credit, holdings, today);
@@ -51,12 +51,13 @@ export function exportTables(portfolio: Portfolio, today: Date): ExportTables {
     credits.push([
       portfolio.product(credit.productId)?.name || "",
       credit.name,
-      centsToDollars(credit.amountCents),
+      centsToDollars(creditAmount(credit, today)),
       CADENCE_LABELS[credit.cadence],
       credit.cadence === "card_year" ? "card year" : period.label,
       summary.used,
       summary.enrolled,
       centsToDollars(summary.remainingCents),
+      credit.unit || "dollars",
     ]);
   }
 

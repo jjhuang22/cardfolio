@@ -20,9 +20,9 @@ done and move them to **Done** with the date.
 - [ ] **Check the Amex Platinum credits** (added 2026-09-29 from public 2026 benefit lists; the
       Amex site itself couldn't be reached): Fine Hotels $300/half, Resy $100/qtr, lululemon $75/qtr,
       Airline fee $200/yr, Digital entertainment $25/mo, Uber Cash $15/mo, Uber One $120/yr,
-      Walmart+ $12.95/mo, CLEAR $209/yr, Oura $200/yr, Equinox $300/yr. Delete any you won't
-      use in Settings → Card types and credits, or mark them not enrolled per card. Uber Cash is $35 in
-      December; the app can't vary a monthly amount yet, so log the extra $20 as a partial use.
+      Walmart+ $12.95/mo, CLEAR $219/yr, Oura $200/yr, Equinox $300/yr. Delete any you won't
+      use in Settings → Card types and credits, or mark them not enrolled per card. Uber Cash can
+      now use a December amount override of $35. See docs/credit-benefits.md for verified terms.
 - [ ] Stop editing the tracker, credits and stats tabs of the Google Sheet once the app is
       the source of truth.
 
@@ -34,6 +34,10 @@ done and move them to **Done** with the date.
       (see README).
 
 ## Review follow-ups
+
+- [ ] Before adding custom eligibility or certificate-expiration logic, confirm whether
+      it is worth adding. Current annual free-night rows have reminders off; multi-year
+      fee reimbursements are deferred rather than modeled as annual credits.
 
 - [ ] Make account edits (`updateAccount`, including moving a card to another cardholder)
       transactional like the new `cardfolio_*` functions. New cards, product changes/undo and
@@ -72,6 +76,11 @@ done and move them to **Done** with the date.
       via RPC (they only reveal the caller's own membership); consider revoking `anon`.
 
 ## Done
+
+- 2026-10-01: Added free-night quantities and monthly amount overrides, including December
+  Uber Cash. Updated displays, use calculations, to-dos, reminders and exports; added
+  focused regression tests. Reset rules retain the original five cadences. Household
+  records and spreadsheet imports stay in Supabase and outside the Git checkout.
 
 - 2026-10-01: The annual fee review skips the year a card is upgraded or downgraded around its
   anniversary (during the review window or up to 60 days before it opens), since that's the

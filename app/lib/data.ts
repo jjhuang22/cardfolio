@@ -86,6 +86,8 @@ export async function loadPortfolio(db: SupabaseClient, householdId: string): Pr
       productId: num(row.product_id),
       name: String(row.name),
       amountCents: num(row.amount_cents),
+      unit: row.unit === "nights" ? "nights" : "dollars",
+      monthlyAmounts: (row.monthly_amounts ?? {}) as Record<string, number>,
       cadence: row.cadence as Cadence,
       remind: Boolean(row.remind),
       startsOn: text(row.starts_on),
@@ -150,7 +152,7 @@ export async function setOptOut(context: Context, creditId: number, holdingId: n
   }
 }
 
-export type CreditDraft = Pick<Credit, "productId" | "name" | "amountCents" | "cadence" | "remind">;
+export type CreditDraft = Pick<Credit, "productId" | "name" | "amountCents" | "cadence" | "remind" | "unit" | "monthlyAmounts">;
 
 export async function saveCredit(context: Context, id: number | null, draft: Partial<CreditDraft>) {
   const { db, householdId } = context;
@@ -158,6 +160,8 @@ export async function saveCredit(context: Context, id: number | null, draft: Par
     ...(draft.productId !== undefined && { product_id: draft.productId }),
     ...(draft.name !== undefined && { name: draft.name.trim() }),
     ...(draft.amountCents !== undefined && { amount_cents: Math.round(draft.amountCents) }),
+    ...(draft.unit !== undefined && { unit: draft.unit }),
+    ...(draft.monthlyAmounts !== undefined && { monthly_amounts: draft.monthlyAmounts }),
     ...(draft.cadence !== undefined && { cadence: draft.cadence }),
     ...(draft.remind !== undefined && { remind: draft.remind }),
   };

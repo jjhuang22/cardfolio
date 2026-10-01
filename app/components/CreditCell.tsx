@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { CreditState } from "../lib/core/credits";
+import { creditAmount, formatCreditAmount, type CreditState } from "../lib/core/credits";
 import type { Credit, Holding } from "../lib/core/model";
 import { useDialogFocus } from "./useDialogFocus";
 import { CheckIcon } from "./ui";
-import { money, shortDate, fullDate } from "../lib/presentation/format";
+import { shortDate, fullDate } from "../lib/presentation/format";
 
 export type CellTarget = { credit: Credit; holding: Holding };
 
@@ -43,8 +43,8 @@ export function CreditCell({ credit, state, due, label, onToggle, onMenu }: Cell
     description = "used";
   } else if (state.kind === "partial") {
     className += " partial";
-    content = <span className="num">{money(state.usedCents)}</span>;
-    description = `${money(state.usedCents)} of ${money(credit.amountCents)} used`;
+    content = <span className="num">{formatCreditAmount(credit, state.usedCents)}</span>;
+    description = `${formatCreditAmount(credit, state.usedCents)} of ${formatCreditAmount(credit, state.amountCents)} used`;
   }
   if (due) className += " due";
 
@@ -85,6 +85,7 @@ export function CreditCell({ credit, state, due, label, onToggle, onMenu }: Cell
 }
 
 type MenuProps = {
+  today: Date;
   credit: Credit;
   state: CreditState;
   heading: string;
@@ -94,7 +95,8 @@ type MenuProps = {
   onClose: () => void;
 };
 
-export function CreditMenu({ credit, state, heading, anchor, onUse, onEnroll, onClose }: MenuProps) {
+export function CreditMenu({ credit, today, state, heading, anchor, onUse, onEnroll, onClose }: MenuProps) {
+  const amountCents = creditAmount(credit, today);
   const [amount, setAmount] = useState(state.kind === "partial" ? String(state.usedCents / 100) : "");
   const panel = useRef<HTMLDivElement>(null);
   useDialogFocus(panel, onClose);
@@ -106,7 +108,7 @@ export function CreditMenu({ credit, state, heading, anchor, onUse, onEnroll, on
     event.preventDefault();
     const dollars = Number(amount);
     if (!dollars || dollars <= 0) return;
-    onUse(Math.min(Math.round(dollars * 100), credit.amountCents));
+    onUse(Math.min(Math.round(dollars * 100), amountCents));
   };
 
   return (
@@ -114,16 +116,16 @@ export function CreditMenu({ credit, state, heading, anchor, onUse, onEnroll, on
       <div className="menu-scrim" onClick={onClose} />
       <div ref={panel} tabIndex={-1} className="pop" role="dialog" aria-modal="true" aria-label={`${credit.name} options`} style={{ left, top, width }}>
         <div>
-          <h3>{credit.name} · {money(credit.amountCents)}</h3>
+          <h3>{credit.name} · {formatCreditAmount(credit, amountCents)}</h3>
           <p>{heading}{state.kind !== "off" && ` · ${state.period.label} ends ${shortDate(state.period.end)}`}</p>
         </div>
         {state.kind !== "off" && (
           <>
-            <button type="button" className="opt" onClick={() => onUse(credit.amountCents)}>Used in full ({money(credit.amountCents)})</button>
-            <form onSubmit={savePartial}>
-              <input id="partial-amount" type="number" min="0.01" step="0.01" max={credit.amountCents / 100} inputMode="decimal" placeholder="Amount used ($)" aria-label="Amount used in dollars" value={amount} onChange={(event) => setAmount(event.target.value)} />
+            <button type="button" className="opt" onClick={() => onUse(amountCents)}>Used in full ({formatCreditAmount(credit, amountCents)})</button>
+            {credit.unit !== "nights" && <form onSubmit={savePartial}>
+              <input id="partial-amount" type="number" min="0.01" step="0.01" max={amountCents / 100} inputMode="decimal" placeholder="Amount used ($)" aria-label="Amount used in dollars" value={amount} onChange={(event) => setAmount(event.target.value)} />
               <button type="submit" className="btn small">Save</button>
-            </form>
+            </form>}
           </>
         )}
         <button type="button" className="opt" onClick={() => onEnroll(state.kind === "off")}>

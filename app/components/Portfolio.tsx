@@ -2,7 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { creditState } from "../lib/core/credits";
+import { creditAmount, formatCreditAmount, creditState } from "../lib/core/credits";
 import { atNoon } from "../lib/core/dates";
 import { cardTag, holdingName, indexPortfolio, type Account, type PortfolioData } from "../lib/core/model";
 import { dueItems, personStats } from "../lib/core/stats";
@@ -15,7 +15,7 @@ import { CreditMenu, type CellTarget } from "./CreditCell";
 import { SettingsDrawer, type Membership } from "./SettingsDrawer";
 import { GettingStarted } from "./GettingStarted";
 import { CheckIcon, Dot, personTone, Toast, type ToastMessage } from "./ui";
-import { money, shortDate } from "../lib/presentation/format";
+import { shortDate } from "../lib/presentation/format";
 
 type Props = { db: SupabaseClient; accessToken: string; onSignOut: () => Promise<void> };
 type View = "cards" | "credits";
@@ -164,7 +164,7 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
     if (!portfolio) return;
     const state = creditState(portfolio, target.credit, target.holding, today);
     if (state.kind === "used") setUse(target, null, "Cleared");
-    else setUse(target, target.credit.amountCents, "Marked used:");
+    else setUse(target, creditAmount(target.credit, today), "Marked used:");
   }
 
   function setEnrolled(target: CellTarget, enrolled: boolean) {
@@ -387,11 +387,12 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
       {menu && menuState && (
         <CreditMenu
           credit={menu.target.credit}
+          today={today}
           state={menuState}
           anchor={menu.anchor}
           heading={holdingName(portfolio, menu.target.holding)}
           onClose={() => setMenu(null)}
-          onUse={(amountCents) => { setMenu(null); setUse(menu.target, amountCents, amountCents === null ? "Cleared" : amountCents >= menu.target.credit.amountCents ? "Marked used:" : `Logged ${money(amountCents)} of`); }}
+          onUse={(amountCents) => { setMenu(null); setUse(menu.target, amountCents, amountCents === null ? "Cleared" : amountCents >= creditAmount(menu.target.credit, today) ? "Marked used:" : `Logged ${formatCreditAmount(menu.target.credit, amountCents)} of`); }}
           onEnroll={(enrolled) => { setMenu(null); setEnrolled(menu.target, enrolled); }}
         />
       )}

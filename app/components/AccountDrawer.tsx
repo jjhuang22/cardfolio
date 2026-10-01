@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { creditIsDue, creditState, eligibleHoldings } from "../lib/core/credits";
+import { formatCreditAmount, creditIsDue, creditState, eligibleHoldings } from "../lib/core/credits";
 import { isoDate } from "../lib/core/dates";
 import { holdingName, nextHoldingNumber, personCode, shortName, type Account, type BonusUnit, type Holding, type Kind, type OpenedVia, type Portfolio } from "../lib/core/model";
 import { OPENED_VIA_LABELS } from "../lib/presentation/labels";
@@ -272,12 +272,12 @@ export function AccountDrawer(props: Props) {
               const state = creditState(portfolio, credit, current, today);
               const status = state.kind === "off" ? "Not enrolled"
                 : state.kind === "used" ? `Used${state.uses.at(-1)?.recordedBy ? ` · marked by ${state.uses.at(-1)?.recordedBy}` : ""}`
-                : state.kind === "partial" ? `${money(state.usedCents)} of ${money(credit.amountCents)} used` : "Not used yet";
+                : state.kind === "partial" ? `${formatCreditAmount(credit, state.usedCents)} of ${formatCreditAmount(credit, state.amountCents)} used` : "Not used yet";
               return (
                 <div key={credit.id} className="inline-credit">
                   <CreditCell credit={credit} state={state} due={creditIsDue(credit, state)} label={credit.name}
                     onToggle={() => props.onToggle({ credit, holding: current })} onMenu={(anchor) => props.onMenu({ credit, holding: current }, anchor)} />
-                  <span className="grow">{credit.name} · {money(credit.amountCents)}
+                  <span className="grow">{credit.name} · {formatCreditAmount(credit, state.kind === "off" ? credit.amountCents : state.amountCents)}
                     <small>{status}{state.kind !== "off" && ` · ${state.period.label} ends ${shortDate(state.period.end)}`}</small>
                   </span>
                 </div>
