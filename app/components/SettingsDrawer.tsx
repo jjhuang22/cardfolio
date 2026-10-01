@@ -107,14 +107,6 @@ function CreditRow({ credit, onSave, onDelete }: { credit: Credit; onSave: Props
       {credit.unit === "nights"
         ? <input type="number" min="1" step="1" aria-label={`${credit.name} number of nights`} value={amount} onChange={(event) => setAmount(event.target.value)} onBlur={saveText} />
         : <DollarInput label={`${credit.name} amount in dollars`} value={amount} onChange={setAmount} onBlur={saveText} />}
-      {Object.entries(credit.monthlyAmounts || {}).map(([month, value]) => <label className="f" key={month}>
-        {new Intl.DateTimeFormat("en-US", { month: "long" }).format(new Date(2026, Number(month) - 1, 1))} amount
-        <input type="number" min="0.01" step="0.01" aria-label={`${credit.name} month ${month} amount`} defaultValue={value / 100} onBlur={(event) => {
-          const next = toCents(event.target.value);
-          if (next > 0 && next !== value) void onSave(credit.id, { monthlyAmounts: { ...credit.monthlyAmounts, [month]: next } });
-          else event.target.value = String(value / 100);
-        }} />
-      </label>)}
       <select aria-label={`How often ${credit.name} resets`} value={credit.cadence} onChange={(event) => void onSave(credit.id, { cadence: event.target.value as Cadence })}>
         {CADENCES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select>

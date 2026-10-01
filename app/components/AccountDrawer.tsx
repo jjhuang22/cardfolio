@@ -272,12 +272,12 @@ export function AccountDrawer(props: Props) {
               const state = creditState(portfolio, credit, current, today);
               const status = state.kind === "off" ? "Not enrolled"
                 : state.kind === "used" ? `Used${state.uses.at(-1)?.recordedBy ? ` · marked by ${state.uses.at(-1)?.recordedBy}` : ""}`
-                : state.kind === "partial" ? `${formatCreditAmount(credit, state.usedCents)} of ${formatCreditAmount(credit, state.amountCents)} used` : "Not used yet";
+                : state.kind === "partial" ? `${formatCreditAmount(credit, state.usedCents)} of ${formatCreditAmount(credit, credit.amountCents)} used` : "Not used yet";
               return (
                 <div key={credit.id} className="inline-credit">
                   <CreditCell credit={credit} state={state} due={creditIsDue(credit, state)} label={credit.name}
                     onToggle={() => props.onToggle({ credit, holding: current })} onMenu={(anchor) => props.onMenu({ credit, holding: current }, anchor)} />
-                  <span className="grow">{credit.name} · {formatCreditAmount(credit, state.kind === "off" ? credit.amountCents : state.amountCents)}
+                  <span className="grow">{credit.name} · {formatCreditAmount(credit, credit.amountCents)}
                     <small>{status}{state.kind !== "off" && ` · ${state.period.label} ends ${shortDate(state.period.end)}`}</small>
                   </span>
                 </div>

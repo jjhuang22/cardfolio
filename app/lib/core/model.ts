@@ -62,8 +62,6 @@ export type Credit = {
   amountCents: number;
   /** Amounts use hundredths for both dollars and nights. */
   unit?: "dollars" | "nights";
-  /** Monthly replacement amounts, keyed by month number (1–12). */
-  monthlyAmounts?: Record<string, number>;
   cadence: Cadence;
   remind: boolean;
   startsOn: string | null;

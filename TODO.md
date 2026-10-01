@@ -21,8 +21,10 @@ done and move them to **Done** with the date.
       Amex site itself couldn't be reached): Fine Hotels $300/half, Resy $100/qtr, lululemon $75/qtr,
       Airline fee $200/yr, Digital entertainment $25/mo, Uber Cash $15/mo, Uber One $120/yr,
       Walmart+ $12.95/mo, CLEAR $219/yr, Oura $200/yr, Equinox $300/yr. Delete any you won't
-      use in Settings → Card types and credits, or mark them not enrolled per card. Uber Cash can
-      now use a December amount override of $35. See docs/credit-benefits.md for verified terms.
+      use in Settings → Card types and credits, or mark them not enrolled per card. Uber Cash
+      remains $15/month in the tracker; the real benefit adds $20 in December, which is not
+      separately tracked. Benefit amounts are maintained in Supabase; verify issuer terms
+      before changing them. Dated research is retained outside Git.
 - [ ] Stop editing the tracker, credits and stats tabs of the Google Sheet once the app is
       the source of truth.
 
@@ -77,9 +79,10 @@ done and move them to **Done** with the date.
 
 ## Done
 
-- 2026-10-01: Added free-night quantities and monthly amount overrides, including December
-  Uber Cash. Updated displays, use calculations, to-dos, reminders and exports; added
-  focused regression tests. Reset rules retain the original five cadences. Household
+- 2026-10-01: Added free-night quantities for annual anniversary benefits. Kept existing
+  fixed-amount credit logic and the original five reset cadences; removed the proposed
+  monthly overrides and benefits catalogue. Updated displays, reminders and exports;
+  added a free-night regression test. Household
   records and spreadsheet imports stay in Supabase and outside the Git checkout.
 
 - 2026-10-01: The annual fee review skips the year a card is upgraded or downgraded around its

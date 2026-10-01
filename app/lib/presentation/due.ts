@@ -1,4 +1,4 @@
-import { creditAmount, formatCreditAmount } from "../core/credits.ts";
+import { formatCreditAmount } from "../core/credits.ts";
 import { bonusLabel, holdingName, shortName, type Account, type Portfolio } from "../core/model.ts";
 import type { DueItem } from "../core/stats.ts";
 import { inDays, money, shortDate } from "./format.ts";
@@ -11,7 +11,7 @@ export function dueText(portfolio: Portfolio, item: DueItem) {
   };
   switch (item.kind) {
     case "credit":
-      return { label: "Credit", text: `${item.credit.name} ${formatCreditAmount(item.credit, creditAmount(item.credit, item.period.start))} on ${shortName(portfolio.product(item.credit.productId))}: ${item.holdings.length} card${item.holdings.length === 1 ? "" : "s"} left`, when: `${item.period.label} ends ${inDays(item.daysLeft)}` };
+      return { label: "Credit", text: `${item.credit.name} ${formatCreditAmount(item.credit, item.credit.amountCents)} on ${shortName(portfolio.product(item.credit.productId))}: ${item.holdings.length} card${item.holdings.length === 1 ? "" : "s"} left`, when: `${item.period.label} ends ${inDays(item.daysLeft)}` };
     case "review":
       return { label: "Review", text: `${item.rule.name}: ${who(item.account)}`, when: "" };
     case "bonus":

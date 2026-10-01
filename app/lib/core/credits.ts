@@ -1,10 +1,6 @@
 import { addDays, anniversaryIn, daysBetween, lastAnniversary, parseDate } from "./dates.ts";
 import { formatMoney, isActiveOn, type Credit, type CreditUse, type Holding, type Portfolio } from "./model.ts";
 
-export function creditAmount(credit: Credit, today: Date) {
-  return credit.cadence === "monthly" ? credit.monthlyAmounts?.[String(today.getMonth() + 1)] ?? credit.amountCents : credit.amountCents;
-}
-
 export function formatCreditAmount(credit: Credit, amount = credit.amountCents) {
   return credit.unit === "nights" ? `${amount / 100} ${amount === 100 ? "night" : "nights"}` : formatMoney(amount);
 }
@@ -76,16 +72,15 @@ export function eligibleHoldings(portfolio: Portfolio, credit: Credit, today: Da
 
 export type CreditState =
   | { kind: "off" }
-  | { kind: "open" | "partial" | "used"; period: Period; amountCents: number; usedCents: number; uses: CreditUse[]; daysLeft: number };
+  | { kind: "open" | "partial" | "used"; period: Period; usedCents: number; uses: CreditUse[]; daysLeft: number };
 
 export function creditState(portfolio: Portfolio, credit: Credit, holding: Holding, today: Date): CreditState {
   if (portfolio.optedOut(credit.id, holding.id)) return { kind: "off" };
   const period = periodFor(portfolio, credit, holding, today);
   const uses = portfolio.usesFor(credit.id, holding.id, period.key);
   const usedCents = uses.reduce((total, use) => total + use.amountCents, 0);
-  const amountCents = creditAmount(credit, today);
-  const kind = usedCents <= 0 ? "open" : usedCents >= amountCents ? "used" : "partial";
-  return { kind, period, amountCents, usedCents, uses, daysLeft: daysBetween(today, period.end) };
+  const kind = usedCents <= 0 ? "open" : usedCents >= credit.amountCents ? "used" : "partial";
+  return { kind, period, usedCents, uses, daysLeft: daysBetween(today, period.end) };
 }
 
 export const DUE_WINDOW_DAYS = 31;
@@ -101,6 +96,6 @@ export function creditSummary(portfolio: Portfolio, credit: Credit, holdings: Ho
   return {
     used: enrolled.filter((state) => state.kind === "used").length,
     enrolled: enrolled.length,
-    remainingCents: enrolled.reduce((total, state) => total + ("usedCents" in state ? Math.max(0, state.amountCents - state.usedCents) : 0), 0),
+    remainingCents: enrolled.reduce((total, state) => total + ("usedCents" in state ? Math.max(0, credit.amountCents - state.usedCents) : 0), 0),
   };
 }

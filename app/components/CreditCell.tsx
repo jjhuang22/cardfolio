@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { creditAmount, formatCreditAmount, type CreditState } from "../lib/core/credits";
+import { formatCreditAmount, type CreditState } from "../lib/core/credits";
 import type { Credit, Holding } from "../lib/core/model";
 import { useDialogFocus } from "./useDialogFocus";
 import { CheckIcon } from "./ui";
@@ -44,7 +44,7 @@ export function CreditCell({ credit, state, due, label, onToggle, onMenu }: Cell
   } else if (state.kind === "partial") {
     className += " partial";
     content = <span className="num">{formatCreditAmount(credit, state.usedCents)}</span>;
-    description = `${formatCreditAmount(credit, state.usedCents)} of ${formatCreditAmount(credit, state.amountCents)} used`;
+    description = `${formatCreditAmount(credit, state.usedCents)} of ${formatCreditAmount(credit, credit.amountCents)} used`;
   }
   if (due) className += " due";
 
@@ -85,7 +85,6 @@ export function CreditCell({ credit, state, due, label, onToggle, onMenu }: Cell
 }
 
 type MenuProps = {
-  today: Date;
   credit: Credit;
   state: CreditState;
   heading: string;
@@ -95,8 +94,8 @@ type MenuProps = {
   onClose: () => void;
 };
 
-export function CreditMenu({ credit, today, state, heading, anchor, onUse, onEnroll, onClose }: MenuProps) {
-  const amountCents = creditAmount(credit, today);
+export function CreditMenu({ credit, state, heading, anchor, onUse, onEnroll, onClose }: MenuProps) {
+  const amountCents = credit.amountCents;
   const [amount, setAmount] = useState(state.kind === "partial" ? String(state.usedCents / 100) : "");
   const panel = useRef<HTMLDivElement>(null);
   useDialogFocus(panel, onClose);
