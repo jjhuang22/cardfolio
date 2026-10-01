@@ -1,4 +1,4 @@
-import { bonusLabel, cardTag, holdingName, type Account, type Holding, type Portfolio } from "../lib/core/model";
+import { bonusLabel, cardTag, holdingName, personCode, type Account, type Holding, type Portfolio } from "../lib/core/model";
 import { bonusStatus } from "../lib/core/stats";
 import { cardStatus, type StatusTag } from "../lib/presentation/card-status";
 import { money } from "../lib/presentation/format";
@@ -9,7 +9,7 @@ export function WhoLabel({ portfolio, holding, withProduct }: { portfolio: Portf
   const person = portfolio.person(holding.personId);
   const name = person?.name || "Unknown";
   return <span className="who">
-    <Dot name={name} tone={personTone(person?.sort ?? 0)} />
+    <Dot code={personCode(person)} tone={personTone(person?.sort ?? 0)} />
     <span title={name} className={withProduct ? undefined : "num"}>{withProduct ? holdingName(portfolio, holding) : cardTag(portfolio, holding) || name}</span>
     {holding.last4 && <span className="last4 num">··{holding.last4}</span>}
   </span>;

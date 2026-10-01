@@ -332,7 +332,7 @@ export async function deleteAccount(context: Context, accountId: number) {
 
 export type PersonDraft = { name: string; code?: string | null };
 
-const cleanCode = (code: string | null | undefined) => code?.trim().toUpperCase() || null;
+const cleanCode = (code: string | null | undefined) => code?.trim() || null;
 
 export async function addPerson(context: Context, draft: PersonDraft, sort: number) {
   const row = check(await context.db.from("people").insert({ household_id: context.householdId, name: draft.name.trim(), code: cleanCode(draft.code), sort }).select("id").single(), "add the person");

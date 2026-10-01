@@ -194,7 +194,7 @@ function PersonRow({ person, onSave }: { person: Person; onSave: Props["onSavePe
   const [code, setCode] = useState(person.code ?? "");
   const save = () => {
     const nextName = name.trim() || person.name;
-    const nextCode = code.trim().toUpperCase();
+    const nextCode = code.trim();
     setName(nextName);
     if (nextName !== person.name || nextCode !== (person.code ?? "")) {
       void onSave(person.id, nextName, nextCode).then((ok) => { if (!ok) { setName(person.name); setCode(person.code ?? ""); } });
@@ -205,7 +205,7 @@ function PersonRow({ person, onSave }: { person: Person; onSave: Props["onSavePe
       <input className="search grow" aria-label="Cardholder name" value={name} onChange={(event) => setName(event.target.value)} onBlur={save} />
       <label className="check">Initials
         <input className="search person-code-input" aria-label={`${person.name}'s initials`} maxLength={4} placeholder={personCode(person)} value={code}
-          onChange={(event) => setCode(event.target.value.replace(/[^a-z]/gi, "").toUpperCase())} onBlur={save} />
+          onChange={(event) => setCode(event.target.value.replace(/[^a-z]/gi, ""))} onBlur={save} />
       </label>
     </div>
   );

@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { creditAmount, formatCreditAmount, creditState } from "../lib/core/credits";
 import { atNoon } from "../lib/core/dates";
-import { cardTag, holdingName, indexPortfolio, type Account, type PortfolioData } from "../lib/core/model";
+import { cardTag, holdingName, indexPortfolio, personCode, type Account, type PortfolioData } from "../lib/core/model";
 import { dueItems, personStats } from "../lib/core/stats";
 import * as data from "../lib/data";
 import { AccountDrawer, type ProductChange } from "./AccountDrawer";
@@ -269,7 +269,7 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
           const stats = personStats(portfolio, person.id, today);
           return (
             <div key={person.id} className="person">
-              <Dot name={person.name} tone={personTone(person.sort)} large />
+              <Dot code={personCode(person)} tone={personTone(person.sort)} large />
               <strong>{person.name}</strong>
               <span className="facts">
                 <span><b className="num">{stats.open}</b> open</span>

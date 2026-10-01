@@ -11,8 +11,8 @@ export function personTone(sort: number) {
   return PERSON_TONES[sort % PERSON_TONES.length];
 }
 
-export function Dot({ name, tone, large }: { name: string; tone: string; large?: boolean }) {
-  return <span className={`dot ${tone}`} aria-hidden="true" style={large ? { width: 32, height: 32, fontSize: 14 } : undefined}>{name.slice(0, 1).toUpperCase()}</span>;
+export function Dot({ code, tone, large }: { code: string; tone: string; large?: boolean }) {
+  return <span className={`dot ${tone}`} aria-hidden="true" style={large ? { width: 32, height: 32, fontSize: 14 } : undefined}>{code.slice(0, 2)}</span>;
 }
 
 export function Tag({ tone, title, children }: { tone?: "alert" | "due" | "ok" | "info" | "kept"; title?: string; children: ReactNode }) {

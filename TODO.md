@@ -80,6 +80,9 @@ done and move them to **Done** with the date.
 
 ## Done
 
+- 2026-10-01: Colored cardholder icons show two letters from the configured abbreviation.
+  Card labels and Settings preserve chosen letter casing instead of forcing uppercase.
+
 - 2026-10-01: Added Hide from Credits in card-type settings. Hidden credits remain editable
   and retain usage and exports; hiding atomically turns Remind off, and unhiding leaves it
   off until re-enabled. Hidden credits do not produce tasks or notifications. Restored

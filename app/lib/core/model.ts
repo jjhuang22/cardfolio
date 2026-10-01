@@ -13,7 +13,7 @@ export type Person = { id: number; name: string; code: string | null; email: str
 /** The cardholder's initials used in card labels ("HK" in "biz plat HK7"). */
 export function personCode(person: Pick<Person, "name" | "code"> | undefined) {
   const code = person?.code?.trim();
-  if (code) return code.toUpperCase();
+  if (code) return code;
   const words = (person?.name || "?").trim().split(/\s+/);
   return (words.length > 1 ? words.map((word) => word[0]).join("") : words[0].slice(0, 2)).toUpperCase();
 }
