@@ -2,7 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { creditAmount, formatCreditAmount, creditState } from "../lib/core/credits";
+import { creditAmount, creditState } from "../lib/core/credits";
 import { atNoon } from "../lib/core/dates";
 import { cardTag, holdingName, indexPortfolio, personCode, type Account, type PortfolioData } from "../lib/core/model";
 import { dueItems, personStats } from "../lib/core/stats";
@@ -15,7 +15,7 @@ import { CreditMenu, type CellTarget } from "./CreditCell";
 import { SettingsDrawer, type Membership } from "./SettingsDrawer";
 import { GettingStarted } from "./GettingStarted";
 import { CheckIcon, Dot, personTone, Toast, type ToastMessage } from "./ui";
-import { fullDate } from "../lib/presentation/format";
+import { money, fullDate } from "../lib/presentation/format";
 
 type Props = { db: SupabaseClient; accessToken: string; onSignOut: () => Promise<void> };
 type View = "cards" | "credits";
@@ -163,6 +163,10 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
   function toggleCredit(target: CellTarget) {
     if (!portfolio) return;
     const state = creditState(portfolio, target.credit, target.holding, today);
+    if (state.kind === "used" && state.auto) {
+      notify(`${target.credit.name} is always used, so there's nothing to tick. Change it in Settings → Card types and credits.`);
+      return;
+    }
     if (state.kind === "used") setUse(target, null, "Cleared");
     else setUse(target, creditAmount(target.credit, today), "Marked used:");
   }
@@ -317,6 +321,7 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
               <span><span className="cell partial"><span className="num">$30</span></span>Partly used</span>
               <span><span className="cell" />Not used</span>
               <span><span className="cell off">–</span>Not enrolled</span>
+              {portfolio.credits.some((credit) => credit.mode === "auto") && <span><span className="cell used auto"><CheckIcon /></span>Always used</span>}
               <span>Tap a box to mark it used. Press and hold (or right-click) for a partial amount or to mark it not enrolled.</span>
             </div>
             <CardGroups {...groupProps} />
@@ -386,13 +391,12 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
 
       {menu && menuState && (
         <CreditMenu
-          credit={menu.target.credit}
-          today={today}
+          credit={{ ...menu.target.credit, amountCents: creditAmount(menu.target.credit, today) }}
           state={menuState}
           anchor={menu.anchor}
           heading={holdingName(portfolio, menu.target.holding)}
           onClose={() => setMenu(null)}
-          onUse={(amountCents) => { setMenu(null); setUse(menu.target, amountCents, amountCents === null ? "Cleared" : amountCents >= creditAmount(menu.target.credit, today) ? "Marked used:" : `Logged ${formatCreditAmount(menu.target.credit, amountCents)} of`); }}
+          onUse={(amountCents) => { setMenu(null); setUse(menu.target, amountCents, amountCents === null ? "Cleared" : amountCents >= creditAmount(menu.target.credit, today) ? "Marked used:" : `Logged ${money(amountCents)} of`); }}
           onEnroll={(enrolled) => { setMenu(null); setEnrolled(menu.target, enrolled); }}
         />
       )}

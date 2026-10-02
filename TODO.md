@@ -5,6 +5,13 @@ done and move them to **Done** with the date.
 
 ## Needs Harrison
 
+- [ ] Apply pending migrations through `20261002000002_sync_fork_credit_modes.sql`
+      before deploying the fork's upstream sync. This converts hidden credits to Not using,
+      preserves existing enrollment/history and monthly overrides, and sets Uber Cash's
+      December replacement amount to $35. Review any credits still stored with `unit = 'nights'`:
+      upstream main supports dollar credits only, so set them to Not using or convert them
+      to a dollar value before using them with this version.
+
 - [ ] **Turn on reminders** on each device (Settings → Reminders → Turn on, then Send a test).
       On iPhone, add the site to the home screen first and turn it on from there. Sophia too.
 - [ ] **Card last digits from 1Password**: `brew install 1password-cli jq`, enable
@@ -20,11 +27,9 @@ done and move them to **Done** with the date.
 - [ ] **Check the Amex Platinum credits** (added 2026-09-29 from public 2026 benefit lists; the
       Amex site itself couldn't be reached): Fine Hotels $300/half, Resy $100/qtr, lululemon $75/qtr,
       Airline fee $200/yr, Digital entertainment $25/mo, Uber Cash $15/mo, Uber One $120/yr,
-      Walmart+ $12.95/mo, CLEAR $219/yr, Oura $200/yr, Equinox $300/yr. Delete any you won't
-      use in Settings → Card types and credits, mark them not enrolled per card, or hide them
-      from Credits (hiding also turns reminders off). Uber Cash tracks $15/month and $35 in
-      December through a monthly amount override. Benefit amounts are maintained in Supabase; verify issuer terms
-      before changing them. Dated research is retained outside Git.
+      Walmart+ $12.95/mo, CLEAR $209/yr, Oura $200/yr, Equinox $300/yr. Delete any you won't
+      use in Settings → Card types and credits, or mark them not enrolled per card. Uber Cash is $35 in
+      December through a monthly replacement amount; the total is $35, not $15 plus a separate credit.
 - [ ] Stop editing the tracker, credits and stats tabs of the Google Sheet once the app is
       the source of truth.
 
@@ -36,11 +41,6 @@ done and move them to **Done** with the date.
       (see README).
 
 ## Review follow-ups
-
-
-- [ ] Before adding custom eligibility or certificate-expiration logic, confirm whether
-      it is worth adding. Current annual free-night rows have reminders off; multi-year
-      fee reimbursements are deferred rather than modeled as annual credits.
 
 - [ ] Make account edits (`updateAccount`, including moving a card to another cardholder)
       transactional like the new `cardfolio_*` functions. New cards, product changes/undo and
@@ -80,22 +80,18 @@ done and move them to **Done** with the date.
 
 ## Done
 
-- [x] 2026-10-01: Show the year in the next 5/24 drop date so future years are explicit.
+- [x] 2026-10-02: Synced upstream credit tracking modes into the fork, keeping years in
+      5/24 drop dates, two-letter cardholder icons with chosen casing, and Uber Cash at
+      $35 in December ($15 in other months). Preserved applied migration history and
+      added a forward migration from hidden credits to Not using.
 
-- 2026-10-01: Colored cardholder icons show two letters from the configured abbreviation.
-  Card labels and Settings preserve chosen letter casing instead of forcing uppercase.
-
-- 2026-10-01: Added Hide from Credits in card-type settings. Hidden credits remain editable
-  and retain usage and exports; hiding atomically turns Remind off, and unhiding leaves it
-  off until re-enabled. Hidden credits do not produce tasks or notifications. Restored
-  monthly amount overrides so Uber Cash has one $35 December total and $15 in other months.
-  Verified hidden-grid/settings rendering and regression tests for history and reminders.
-
-- 2026-10-01: Added free-night quantities for annual anniversary benefits. Kept existing
-  fixed-amount credit logic and the original five reset cadences; removed the proposed
-  monthly overrides and benefits catalogue. Updated displays, reminders and exports;
-  added a free-night regression test. Household
-  records and spreadsheet imports stay in Supabase and outside the Git checkout.
+- 2026-10-02: Credit tracking modes (from jjhuang22's "Hide from Credits" PR #2, extended).
+  Each credit in Settings is Track + remind, Track quietly, Always used (recurring charges like
+  digital entertainment: counted as used every period, shown last with dashed checks, tapping
+  explains instead of unticking; a partial amount recorded for a period still takes precedence)
+  or Not using (like Oura: hidden from Credits, the card drawer, To do, notifications and
+  exports, with history kept). Remind is kept while not tracked, so switching back restores it.
+  New `credits.mode` column (`20261002000001_credit_modes.sql`).
 
 - 2026-10-01: The annual fee review skips the year a card is upgraded or downgraded around its
   anniversary (during the review window or up to 60 days before it opens), since that's the

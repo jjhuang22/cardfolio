@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { creditAmount, formatCreditAmount, creditIsDue, creditState, eligibleHoldings } from "../lib/core/credits";
+import { creditAmount, creditIsDue, creditState, eligibleHoldings } from "../lib/core/credits";
 import { isoDate } from "../lib/core/dates";
 import { holdingName, nextHoldingNumber, personCode, shortName, type Account, type BonusUnit, type Holding, type Kind, type OpenedVia, type Portfolio } from "../lib/core/model";
 import { OPENED_VIA_LABELS } from "../lib/presentation/labels";
@@ -88,7 +88,7 @@ export function AccountDrawer(props: Props) {
     : null;
 
   const credits = current && account?.status === "open"
-    ? portfolio.credits.filter((credit) => credit.productId === current.productId && eligibleHoldings(portfolio, credit, today).some((holding) => holding.id === current.id))
+    ? portfolio.credits.filter((credit) => credit.mode !== "skip" && credit.productId === current.productId && eligibleHoldings(portfolio, credit, today).some((holding) => holding.id === current.id))
     : [];
 
   async function run(action: () => Promise<void>) {
@@ -271,13 +271,14 @@ export function AccountDrawer(props: Props) {
             {credits.map((credit) => {
               const state = creditState(portfolio, credit, current, today);
               const status = state.kind === "off" ? "Not enrolled"
+                : state.kind === "used" && state.auto ? "Always used"
                 : state.kind === "used" ? `Used${state.uses.at(-1)?.recordedBy ? ` · marked by ${state.uses.at(-1)?.recordedBy}` : ""}`
-                : state.kind === "partial" ? `${formatCreditAmount(credit, state.usedCents)} of ${formatCreditAmount(credit, state.amountCents)} used` : "Not used yet";
+                : state.kind === "partial" ? `${money(state.usedCents)} of ${money(creditAmount(credit, today))} used` : "Not used yet";
               return (
                 <div key={credit.id} className="inline-credit">
                   <CreditCell credit={credit} state={state} due={creditIsDue(credit, state)} label={credit.name}
                     onToggle={() => props.onToggle({ credit, holding: current })} onMenu={(anchor) => props.onMenu({ credit, holding: current }, anchor)} />
-                  <span className="grow">{credit.name} · {formatCreditAmount(credit, creditAmount(credit, today))}
+                  <span className="grow">{credit.name} · {money(creditAmount(credit, today))}
                     <small>{status}{state.kind !== "off" && ` · ${state.period.label} ends ${shortDate(state.period.end)}`}</small>
                   </span>
                 </div>

@@ -1,12 +1,9 @@
 import { addDays, anniversaryIn, daysBetween, lastAnniversary, parseDate } from "./dates.ts";
-import { formatMoney, isActiveOn, type Credit, type CreditUse, type Holding, type Portfolio } from "./model.ts";
+import { isActiveOn, type Credit, type CreditUse, type Holding, type Portfolio } from "./model.ts";
 
+/** Amount for this period, including December's replacement Uber Cash amount. */
 export function creditAmount(credit: Credit, today: Date) {
   return credit.cadence === "monthly" ? credit.monthlyAmounts?.[String(today.getMonth() + 1)] ?? credit.amountCents : credit.amountCents;
-}
-
-export function formatCreditAmount(credit: Credit, amount = credit.amountCents) {
-  return credit.unit === "nights" ? `${amount / 100} ${amount === 100 ? "night" : "nights"}` : formatMoney(amount);
 }
 
 export type Period = { key: string; label: string; start: Date; end: Date };
@@ -76,14 +73,16 @@ export function eligibleHoldings(portfolio: Portfolio, credit: Credit, today: Da
 
 export type CreditState =
   | { kind: "off" }
-  | { kind: "open" | "partial" | "used"; period: Period; amountCents: number; usedCents: number; uses: CreditUse[]; daysLeft: number };
+  | { kind: "open" | "partial" | "used"; period: Period; usedCents: number; uses: CreditUse[]; daysLeft: number; amountCents: number; auto?: boolean };
 
 export function creditState(portfolio: Portfolio, credit: Credit, holding: Holding, today: Date): CreditState {
-  if (portfolio.optedOut(credit.id, holding.id)) return { kind: "off" };
+  if (credit.mode === "skip" || portfolio.optedOut(credit.id, holding.id)) return { kind: "off" };
   const period = periodFor(portfolio, credit, holding, today);
   const uses = portfolio.usesFor(credit.id, holding.id, period.key);
   const usedCents = uses.reduce((total, use) => total + use.amountCents, 0);
   const amountCents = creditAmount(credit, today);
+  // An always-used credit counts as used unless something was recorded for this period.
+  if (credit.mode === "auto" && !uses.length) return { kind: "used", period, amountCents, usedCents: amountCents, uses, daysLeft: daysBetween(today, period.end), auto: true };
   const kind = usedCents <= 0 ? "open" : usedCents >= amountCents ? "used" : "partial";
   return { kind, period, amountCents, usedCents, uses, daysLeft: daysBetween(today, period.end) };
 }
@@ -92,7 +91,7 @@ export const DUE_WINDOW_DAYS = 31;
 
 /** Whether an unused credit on this card needs attention soon. */
 export function creditIsDue(credit: Credit, state: CreditState) {
-  return !credit.hidden && credit.remind && state.kind !== "off" && state.kind !== "used" && state.daysLeft <= DUE_WINDOW_DAYS;
+  return credit.mode === "track" && credit.remind && state.kind !== "off" && state.kind !== "used" && state.daysLeft <= DUE_WINDOW_DAYS;
 }
 
 export function creditSummary(portfolio: Portfolio, credit: Credit, holdings: Holding[], today: Date) {
