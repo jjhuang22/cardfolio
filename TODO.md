@@ -5,12 +5,9 @@ done and move them to **Done** with the date.
 
 ## Needs Harrison
 
-- [ ] Apply pending migrations through `20261002000002_sync_fork_credit_modes.sql`
-      before deploying the fork's upstream sync. This converts hidden credits to Not using,
-      preserves existing enrollment/history and monthly overrides, and sets Uber Cash's
-      December replacement amount to $35. Review any credits still stored with `unit = 'nights'`:
-      upstream main supports dollar credits only, so set them to Not using or convert them
-      to a dollar value before using them with this version.
+- [ ] Review the one free-night credit retained as Not using during the upstream sync.
+      Upstream main supports dollar credits only; keep that record as Not using or convert
+      its amount to a dollar value before tracking it in this version.
 
 - [ ] **Turn on reminders** on each device (Settings → Reminders → Turn on, then Send a test).
       On iPhone, add the site to the home screen first and turn it on from there. Sophia too.
@@ -79,6 +76,13 @@ done and move them to **Done** with the date.
       via RPC (they only reveal the caller's own membership); consider revoking `anon`.
 
 ## Done
+
+- [x] 2026-10-02: Applied `20261002000001_credit_modes.sql` and
+      `20261002000002_sync_fork_credit_modes.sql` to the fork's Supabase project
+      `itfyxermtwvadnactrkj` in one transaction and recorded both migration versions.
+      Verified all 21 credits remain, six hidden credits became Not using, the one
+      free-night credit is retained as Not using, and all 10 usage records plus enrollment
+      records are unchanged. Uber Cash remains $15 normally and $35 in December.
 
 - [x] 2026-10-02: Synced upstream credit tracking modes into the fork, keeping years in
       5/24 drop dates, two-letter cardholder icons with chosen casing, and Uber Cash at
