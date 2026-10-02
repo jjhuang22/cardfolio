@@ -5,10 +5,6 @@ done and move them to **Done** with the date.
 
 ## Needs Harrison
 
-- [ ] Review the one free-night credit retained as Not using during the upstream sync.
-      Upstream main supports dollar credits only; keep that record as Not using or convert
-      its amount to a dollar value before tracking it in this version.
-
 - [ ] **Turn on reminders** on each device (Settings → Reminders → Turn on, then Send a test).
       On iPhone, add the site to the home screen first and turn it on from there. Sophia too.
 - [ ] **Card last digits from 1Password**: `brew install 1password-cli jq`, enable
@@ -76,6 +72,14 @@ done and move them to **Done** with the date.
       via RPC (they only reveal the caller's own membership); consider revoking `anon`.
 
 ## Done
+
+- [x] 2026-10-02: Restored free-night quantities alongside upstream's Track, Always used
+      and Not using modes. Amounts display as nights in the grid, card drawer, usage menu,
+      to-dos and notifications; exports retain the unit. Card-year free-night credits reset
+      on the approval anniversary. December Uber Cash, year dates and cardholder icons stay.
+      Verified the live Hyatt anniversary credit retains its one-night quantity and card-year
+      cadence and is already set to Track with Remind enabled. Preserved those current choices;
+      the retained unit column needs no additional database migration.
 
 - [x] 2026-10-02: Applied `20261002000001_credit_modes.sql` and
       `20261002000002_sync_fork_credit_modes.sql` to the fork's Supabase project

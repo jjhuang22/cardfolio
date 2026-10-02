@@ -1,6 +1,6 @@
 "use client";
 
-import { creditAmount, creditIsDue, creditState, creditSummary, eligibleHoldings, periodFor, DUE_WINDOW_DAYS } from "../lib/core/credits";
+import { formatCreditAmount, creditAmount, creditIsDue, creditState, creditSummary, eligibleHoldings, periodFor, DUE_WINDOW_DAYS } from "../lib/core/credits";
 import { daysBetween } from "../lib/core/dates";
 import { holdingName, shortName, type Account, type Credit, type Holding, type Portfolio } from "../lib/core/model";
 import { CreditCell, type CellTarget } from "./CreditCell";
@@ -159,7 +159,7 @@ function CreditHeader({ portfolio, credit, rows, today }: { portfolio: Portfolio
   return (
     <th className={`credit ${auto ? "auto-col" : credit.remind ? "" : "muted"} ${due ? "due-col" : ""}`} title={title}>
       <span className="cname">{credit.name}</span>
-      <span className="cmeta num">{money(creditAmount(credit, today))}</span>
+      <span className="cmeta num">{formatCreditAmount(credit, creditAmount(credit, today))}</span>
       <span className="cmeta">{meta}</span>
     </th>
   );

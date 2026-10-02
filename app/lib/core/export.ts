@@ -43,7 +43,7 @@ export function exportTables(portfolio: Portfolio, today: Date): ExportTables {
     });
   }
 
-  const credits: ExportTables["credits"] = [["card type", "credit", "amount", "frequency", "period", "used", "tracked cards", "left this period"]];
+  const credits: ExportTables["credits"] = [["card type", "credit", "amount", "frequency", "period", "used", "tracked cards", "left this period", "unit"]];
   for (const credit of portfolio.credits) {
     if (credit.mode === "skip") continue;
     const holdings = eligibleHoldings(portfolio, credit, today);
@@ -58,6 +58,7 @@ export function exportTables(portfolio: Portfolio, today: Date): ExportTables {
       summary.used,
       summary.enrolled,
       centsToDollars(summary.remainingCents),
+      credit.unit || "dollars",
     ]);
   }
 

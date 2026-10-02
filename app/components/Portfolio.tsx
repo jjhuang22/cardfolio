@@ -2,7 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { creditAmount, creditState } from "../lib/core/credits";
+import { formatCreditAmount, creditAmount, creditState } from "../lib/core/credits";
 import { atNoon } from "../lib/core/dates";
 import { cardTag, holdingName, indexPortfolio, personCode, type Account, type PortfolioData } from "../lib/core/model";
 import { dueItems, personStats } from "../lib/core/stats";
@@ -15,7 +15,7 @@ import { CreditMenu, type CellTarget } from "./CreditCell";
 import { SettingsDrawer, type Membership } from "./SettingsDrawer";
 import { GettingStarted } from "./GettingStarted";
 import { CheckIcon, Dot, personTone, Toast, type ToastMessage } from "./ui";
-import { money, fullDate } from "../lib/presentation/format";
+import { fullDate } from "../lib/presentation/format";
 
 type Props = { db: SupabaseClient; accessToken: string; onSignOut: () => Promise<void> };
 type View = "cards" | "credits";
@@ -396,7 +396,7 @@ export function Portfolio({ db, accessToken, onSignOut }: Props) {
           anchor={menu.anchor}
           heading={holdingName(portfolio, menu.target.holding)}
           onClose={() => setMenu(null)}
-          onUse={(amountCents) => { setMenu(null); setUse(menu.target, amountCents, amountCents === null ? "Cleared" : amountCents >= creditAmount(menu.target.credit, today) ? "Marked used:" : `Logged ${money(amountCents)} of`); }}
+          onUse={(amountCents) => { setMenu(null); setUse(menu.target, amountCents, amountCents === null ? "Cleared" : amountCents >= creditAmount(menu.target.credit, today) ? "Marked used:" : `Logged ${formatCreditAmount(menu.target.credit, amountCents)} of`); }}
           onEnroll={(enrolled) => { setMenu(null); setEnrolled(menu.target, enrolled); }}
         />
       )}

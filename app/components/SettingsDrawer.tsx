@@ -116,7 +116,8 @@ function CreditRow({ credit, onSave, onDelete }: { credit: Credit; onSave: Props
   const saveText = () => {
     const amountCents = toCents(amount);
     const nextName = name.trim() || credit.name;
-    const nextAmount = amountCents > 0 ? amountCents : credit.amountCents;
+    const validAmount = amountCents > 0 && (credit.unit !== "nights" || amountCents % 100 === 0);
+    const nextAmount = validAmount ? amountCents : credit.amountCents;
     // Put back anything that can't be saved (a blank name or a zero amount).
     setName(nextName);
     setAmount(toDollarsInput(nextAmount));
@@ -125,7 +126,9 @@ function CreditRow({ credit, onSave, onDelete }: { credit: Credit; onSave: Props
   return (
     <div className="credit-edit">
       <input className="credit-name" aria-label="Credit name" value={name} onChange={(event) => setName(event.target.value)} onBlur={saveText} />
-      <DollarInput label={`${credit.name} amount in dollars`} value={amount} onChange={setAmount} onBlur={saveText} />
+      {credit.unit === "nights"
+        ? <input type="number" min="1" step="1" aria-label={`${credit.name} number of nights`} value={amount} onChange={(event) => setAmount(event.target.value)} onBlur={saveText} />
+        : <DollarInput label={`${credit.name} amount in dollars`} value={amount} onChange={setAmount} onBlur={saveText} />}
       <select aria-label={`How often ${credit.name} resets`} value={credit.cadence} onChange={(event) => void onSave(credit.id, { cadence: event.target.value as Cadence })}>
         {CADENCES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select>
@@ -143,7 +146,7 @@ function CreditRow({ credit, onSave, onDelete }: { credit: Credit; onSave: Props
   );
 }
 
-const EMPTY_CREDIT = { name: "", amount: "", cadence: "calendar_year" as Cadence, tracking: "remind" as Tracking };
+const EMPTY_CREDIT = { name: "", amount: "", unit: "dollars" as "dollars" | "nights", cadence: "calendar_year" as Cadence, tracking: "remind" as Tracking };
 
 function ProductSettings({ portfolio, product, open, onSaveProduct, onSaveCredit, onDeleteCredit }: { portfolio: Portfolio; product: Product; open: number } & Pick<Props, "onSaveProduct" | "onSaveCredit" | "onDeleteCredit">) {
   const credits = portfolio.credits.filter((credit) => credit.productId === product.id).sort((left, right) => left.sort - right.sort);
@@ -159,7 +162,7 @@ function ProductSettings({ portfolio, product, open, onSaveProduct, onSaveCredit
     const changed = (Object.keys(saved) as (keyof ProductDraft)[]).some((key) => String(next[key] ?? "").trim() !== String(saved[key] ?? "").trim());
     if (changed) void onSaveProduct(product.id, next);
   };
-  const addCredit = () => onSaveCredit(null, { productId: product.id, name: newCredit.name, amountCents: toCents(newCredit.amount), cadence: newCredit.cadence, remind: true, ...trackingPatch(newCredit.tracking) })
+  const addCredit = () => onSaveCredit(null, { productId: product.id, name: newCredit.name, amountCents: toCents(newCredit.amount), unit: newCredit.unit, cadence: newCredit.cadence, remind: true, ...trackingPatch(newCredit.tracking) })
     .then((ok) => { if (ok) setNewCredit(EMPTY_CREDIT); return ok; });
   const notUsing = credits.filter((credit) => credit.mode === "skip").length;
   const meta = [
@@ -190,9 +193,12 @@ function ProductSettings({ portfolio, product, open, onSaveProduct, onSaveCredit
         <div className="credit-list">
           <h4>Credits</h4>
           {credits.map((credit) => <CreditRow key={credit.id} credit={credit} onSave={onSaveCredit} onDelete={onDeleteCredit} />)}
-          <AddForm className="credit-edit credit-new" onAdd={addCredit} button="Add" ready={!!newCredit.name.trim() && toCents(newCredit.amount) > 0}>
+          <AddForm className="credit-edit credit-new" onAdd={addCredit} button="Add" ready={!!newCredit.name.trim() && toCents(newCredit.amount) > 0 && (newCredit.unit !== "nights" || toCents(newCredit.amount) % 100 === 0)}>
             <input className="credit-name" aria-label="New credit name" placeholder="Add a credit" value={newCredit.name} onChange={(event) => setNewCredit({ ...newCredit, name: event.target.value })} />
-            <DollarInput label="New credit amount in dollars" placeholder="0" value={newCredit.amount} onChange={(amount) => setNewCredit({ ...newCredit, amount })} />
+            <select aria-label="New credit unit" value={newCredit.unit} onChange={(event) => setNewCredit({ ...newCredit, unit: event.target.value as "dollars" | "nights" })}><option value="dollars">Dollars</option><option value="nights">Free nights</option></select>
+            {newCredit.unit === "nights"
+              ? <input type="number" min="1" step="1" aria-label="New credit number of nights" value={newCredit.amount} onChange={(event) => setNewCredit({ ...newCredit, amount: event.target.value })} />
+              : <DollarInput label="New credit amount in dollars" placeholder="0" value={newCredit.amount} onChange={(amount) => setNewCredit({ ...newCredit, amount })} />}
             <select aria-label="How often the new credit resets" value={newCredit.cadence} onChange={(event) => setNewCredit({ ...newCredit, cadence: event.target.value as Cadence })}>
               {CADENCES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>

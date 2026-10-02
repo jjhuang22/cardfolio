@@ -1,9 +1,14 @@
 import { addDays, anniversaryIn, daysBetween, lastAnniversary, parseDate } from "./dates.ts";
-import { isActiveOn, type Credit, type CreditUse, type Holding, type Portfolio } from "./model.ts";
+import { formatMoney, isActiveOn, type Credit, type CreditUse, type Holding, type Portfolio } from "./model.ts";
 
 /** Amount for this period, including December's replacement Uber Cash amount. */
 export function creditAmount(credit: Credit, today: Date) {
   return credit.cadence === "monthly" ? credit.monthlyAmounts?.[String(today.getMonth() + 1)] ?? credit.amountCents : credit.amountCents;
+}
+
+/** Free-night quantities keep their unit instead of being displayed as dollars. */
+export function formatCreditAmount(credit: Credit, amount = credit.amountCents) {
+  return credit.unit === "nights" ? `${amount / 100} ${amount === 100 ? "night" : "nights"}` : formatMoney(amount);
 }
 
 export type Period = { key: string; label: string; start: Date; end: Date };

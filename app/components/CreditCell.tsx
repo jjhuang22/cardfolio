@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { CreditState } from "../lib/core/credits";
+import { formatCreditAmount, type CreditState } from "../lib/core/credits";
 import type { Credit, Holding } from "../lib/core/model";
 import { useDialogFocus } from "./useDialogFocus";
 import { CheckIcon } from "./ui";
-import { money, shortDate, fullDate } from "../lib/presentation/format";
+import { shortDate, fullDate } from "../lib/presentation/format";
 
 export type CellTarget = { credit: Credit; holding: Holding };
 
@@ -21,7 +21,7 @@ type CellProps = {
 };
 
 /** One credit on one card. Tap toggles used; press-and-hold or right-click opens more options. */
-export function CreditCell({ state, due, label, onToggle, onMenu }: CellProps) {
+export function CreditCell({ credit, state, due, label, onToggle, onMenu }: CellProps) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressed = useRef(false);
   const button = useRef<HTMLButtonElement>(null);
@@ -43,8 +43,8 @@ export function CreditCell({ state, due, label, onToggle, onMenu }: CellProps) {
     description = state.auto ? "always used (counted automatically)" : "used";
   } else if (state.kind === "partial") {
     className += " partial";
-    content = <span className="num">{money(state.usedCents)}</span>;
-    description = `${money(state.usedCents)} of ${money(state.amountCents)} used`;
+    content = <span className="num">{formatCreditAmount(credit, state.usedCents)}</span>;
+    description = `${formatCreditAmount(credit, state.usedCents)} of ${formatCreditAmount(credit, state.amountCents)} used`;
   }
   if (due) className += " due";
 
@@ -115,16 +115,16 @@ export function CreditMenu({ credit, state, heading, anchor, onUse, onEnroll, on
       <div className="menu-scrim" onClick={onClose} />
       <div ref={panel} tabIndex={-1} className="pop" role="dialog" aria-modal="true" aria-label={`${credit.name} options`} style={{ left, top, width }}>
         <div>
-          <h3>{credit.name} · {money(amountCents)}</h3>
+          <h3>{credit.name} · {formatCreditAmount(credit, amountCents)}</h3>
           <p>{heading}{state.kind !== "off" && ` · ${state.period.label} ends ${shortDate(state.period.end)}`}</p>
         </div>
         {state.kind !== "off" && (
           <>
-            <button type="button" className="opt" onClick={() => onUse(amountCents)}>Used in full ({money(amountCents)})</button>
-            <form onSubmit={savePartial}>
+            <button type="button" className="opt" onClick={() => onUse(amountCents)}>Used in full ({formatCreditAmount(credit, amountCents)})</button>
+            {credit.unit !== "nights" && <form onSubmit={savePartial}>
               <input id="partial-amount" type="number" min="0.01" step="0.01" max={amountCents / 100} inputMode="decimal" placeholder="Amount used ($)" aria-label="Amount used in dollars" value={amount} onChange={(event) => setAmount(event.target.value)} />
               <button type="submit" className="btn small">Save</button>
-            </form>
+            </form>}
           </>
         )}
         <button type="button" className="opt" onClick={() => onEnroll(state.kind === "off")}>

@@ -87,6 +87,7 @@ export async function loadPortfolio(db: SupabaseClient, householdId: string): Pr
       productId: num(row.product_id),
       name: String(row.name),
       amountCents: num(row.amount_cents),
+      unit: row.unit === "nights" ? "nights" : "dollars",
       monthlyAmounts: (row.monthly_amounts ?? {}) as Record<string, number>,
       cadence: row.cadence as Cadence,
       remind: Boolean(row.remind),
@@ -153,7 +154,7 @@ export async function setOptOut(context: Context, creditId: number, holdingId: n
   }
 }
 
-export type CreditDraft = Pick<Credit, "productId" | "name" | "amountCents" | "cadence" | "remind" | "mode" | "monthlyAmounts">;
+export type CreditDraft = Pick<Credit, "productId" | "name" | "amountCents" | "cadence" | "remind" | "mode" | "monthlyAmounts" | "unit">;
 
 export async function saveCredit(context: Context, id: number | null, draft: Partial<CreditDraft>) {
   const { db, householdId } = context;
@@ -164,6 +165,7 @@ export async function saveCredit(context: Context, id: number | null, draft: Par
     ...(draft.cadence !== undefined && { cadence: draft.cadence }),
     ...(draft.remind !== undefined && { remind: draft.remind }),
     ...(draft.mode !== undefined && { mode: draft.mode }),
+    ...(draft.unit !== undefined && { unit: draft.unit }),
     ...(draft.monthlyAmounts !== undefined && { monthly_amounts: draft.monthlyAmounts }),
   };
   if (id === null) check(await db.from("credits").insert({ household_id: householdId, ...values }), "add the credit");

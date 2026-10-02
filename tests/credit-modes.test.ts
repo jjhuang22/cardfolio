@@ -87,6 +87,8 @@ test("saveCredit changes the mode in one household-scoped request and leaves Rem
   assert.deepEqual(requests[1].body, { remind: true, mode: "track" });
   await saveCredit(context, credit.id, { monthlyAmounts: { "12": 3500 } });
   assert.deepEqual(requests[2].body, { monthly_amounts: { "12": 3500 } });
+  await saveCredit(context, credit.id, { unit: "nights", amountCents: 100 });
+  assert.deepEqual(requests[3].body, { amount_cents: 100, unit: "nights" });
 });
 
 test("loadPortfolio reads the mode, treating anything unknown as tracked", async () => {
@@ -98,13 +100,17 @@ test("loadPortfolio reads the mode, treating anything unknown as tracked", async
           { id: 1, product_id: 1, name: "Digital entertainment", amount_cents: 2500, cadence: "monthly", remind: true, mode: "auto", monthly_amounts: { "12": 3500 }, sort: 0 },
           { id: 2, product_id: 1, name: "Oura", amount_cents: 20000, cadence: "calendar_year", remind: true, mode: "skip", sort: 1 },
           { id: 3, product_id: 1, name: "Hilton", amount_cents: 5000, cadence: "quarterly", remind: true, sort: 2 },
+          { id: 4, product_id: 1, name: "Anniversary free night", amount_cents: 100, unit: "nights", cadence: "card_year", remind: false, mode: "track", sort: 3 },
         ]
         : [];
       return new Response(JSON.stringify(rows), { headers: { "Content-Type": "application/json" } });
     } },
   });
   const loaded = await loadPortfolio(db, "test-household");
-  assert.deepEqual(loaded.credits.map((item) => item.mode), ["auto", "skip", "track"]);
+  assert.deepEqual(loaded.credits.map((item) => item.mode), ["auto", "skip", "track", "track"]);
   assert.deepEqual(loaded.credits[0].monthlyAmounts, { "12": 3500 });
   assert.deepEqual(loaded.credits[1].monthlyAmounts, {});
+  assert.equal(loaded.credits[0].unit, "dollars");
+  assert.equal(loaded.credits[3].unit, "nights");
+  assert.equal(loaded.credits[3].amountCents, 100);
 });
